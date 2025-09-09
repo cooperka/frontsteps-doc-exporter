@@ -77,7 +77,6 @@ def scrape_folder(url, folder_path):
     # It doesn't seem like files can actually be stored here, they need to be in a folder.
     if folder_path != DOWNLOAD_DIR:
         # Process files in this folder.
-        # TODO: handle pagination
         # TODO: handle manifest for caching
         for row in soup.select("table.documents tr"):
             anchor = row.select_one("td:nth-of-type(1) a")
