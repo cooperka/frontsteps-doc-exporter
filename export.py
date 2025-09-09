@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import requests
 import time
 from datetime import datetime
@@ -15,6 +16,7 @@ COMMUNITY_NAME = os.getenv("COMMUNITY_NAME")
 BASE_URL = f"https://{COMMUNITY_NAME}.frontsteps.com"
 FILES_URL = f"{BASE_URL}/folders/"
 DOWNLOAD_DIR = os.getenv("DOWNLOAD_DIR")
+MANIFEST_FILE = os.path.join(DOWNLOAD_DIR, "manifest.json")
 ANTI_SPAM_DURATION_SEC = float(os.getenv("ANTI_SPAM_DURATION_SEC"))
 
 session = requests.Session()
@@ -43,9 +45,36 @@ def get_extension_from_url(url):
     path = urlparse(url).path
     return os.path.splitext(os.path.basename(path))[1]
 
-def save_file(file_url, file_name, date_str, folder_path):
-    """Download and save file with metadata."""
+def load_manifest():
+    """Load manifest JSON if it exists."""
+    if os.path.exists(MANIFEST_FILE):
+        print("Loaded previous manifest, will NOT re-download files")
+        with open(MANIFEST_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    # Otherwise, start fresh.
+    manifest = {"file_urls": {}}
+    save_manifest(manifest)
+    return manifest
+
+def save_manifest(manifest):
+    """Save manifest to disk."""
+    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+    with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+
+def file_in_manifest(file_url, manifest):
+    """Check if file exists in manifest."""
+    return file_url in manifest["file_urls"]
+
+def save_file(file_url, file_name, date_str, folder_path, manifest):
+    """Download and save file with metadata, unless it's already marked as downloaded."""
     os.makedirs(folder_path, exist_ok=True)
+
+    if file_in_manifest(file_url, manifest):
+        print(f"Skipping already-downloaded file: {file_name}")
+        return
+
     r = session.get(file_url, allow_redirects=True)
     r.raise_for_status()
 
@@ -64,9 +93,11 @@ def save_file(file_url, file_name, date_str, folder_path):
     except Exception:
         print(f"Warning: couldn't set date '{date_str}' for '{file_name}'")
 
+    manifest["file_urls"][file_url] = folder_path
+
     print(f"Saved file: {full_path}")
 
-def scrape_folder(url, folder_path):
+def scrape_folder(url, folder_path, manifest):
     """Recursively scrape folders and download files."""
     print(f"Getting files from {folder_path.replace(DOWNLOAD_DIR, "") or "root"}...")
     r = session.get(url)
@@ -77,7 +108,6 @@ def scrape_folder(url, folder_path):
     # It doesn't seem like files can actually be stored here, they need to be in a folder.
     if folder_path != DOWNLOAD_DIR:
         # Process files in this folder.
-        # TODO: handle manifest for caching
         for row in soup.select("table.documents tr"):
             anchor = row.select_one("td:nth-of-type(1) a")
             if anchor:
@@ -85,19 +115,23 @@ def scrape_folder(url, folder_path):
                 download_url = anchor["data-path"] or urljoin(BASE_URL, anchor["href"])
                 date_cell = row.select_one("td:nth-of-type(3)")
                 date_str = date_cell.text.strip() if date_cell else ""
-                save_file(download_url, file_name, date_str, folder_path)
+                save_file(download_url, file_name, date_str, folder_path, manifest)
 
                 time.sleep(ANTI_SPAM_DURATION_SEC)
+
+    # Save manifest occasionally in case of crash.
+    save_manifest(manifest)
 
     # Process subfolders.
     for anchor in soup.select(".folder-listing .folder-title a"):
         folder_name = anchor.text.strip()
         subfolder_url = urljoin(BASE_URL, anchor["href"])
         new_path = os.path.join(folder_path, sanitize_filename(folder_name))
-        scrape_folder(subfolder_url, new_path)
+        scrape_folder(subfolder_url, new_path, manifest)
 
 def main():
     login()
-    scrape_folder(FILES_URL, DOWNLOAD_DIR)
+    manifest = load_manifest()
+    scrape_folder(FILES_URL, DOWNLOAD_DIR, manifest)
 
 main()
