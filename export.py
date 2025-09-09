@@ -114,7 +114,7 @@ def scrape_folder(url, folder_path, manifest):
             anchor = row.select_one("td:nth-of-type(1) a")
             if anchor:
                 file_name = anchor.text.strip()
-                download_url = anchor["data-path"] or urljoin(BASE_URL, anchor["href"])
+                download_url = anchor.get("data-path") or urljoin(BASE_URL, anchor.get("href"))
                 date_cell = row.select_one("td:nth-of-type(3)")
                 date_str = date_cell.text.strip() if date_cell else ""
                 save_file(download_url, file_name, date_str, folder_path, manifest)
