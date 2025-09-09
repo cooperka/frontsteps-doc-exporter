@@ -97,6 +97,8 @@ def save_file(file_url, file_name, date_str, folder_path, manifest):
 
     print(f"Saved file: {full_path}")
 
+    time.sleep(ANTI_SPAM_DURATION_SEC)
+
 def scrape_folder(url, folder_path, manifest):
     """Recursively scrape folders and download files."""
     print(f"Getting files from {folder_path.replace(DOWNLOAD_DIR, "") or "root"}...")
@@ -116,8 +118,6 @@ def scrape_folder(url, folder_path, manifest):
                 date_cell = row.select_one("td:nth-of-type(3)")
                 date_str = date_cell.text.strip() if date_cell else ""
                 save_file(download_url, file_name, date_str, folder_path, manifest)
-
-                time.sleep(ANTI_SPAM_DURATION_SEC)
 
     # Save manifest occasionally in case of crash.
     save_manifest(manifest)
