@@ -1,0 +1,13 @@
+# Secrets
+.env
+
+# Outputs
+/frontsteps_downloads/
+
+# Temp files
+.DS_Store
+/junk/
+
+# IDE configs
+.vscode/
+.idea/
