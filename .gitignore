@@ -3,6 +3,7 @@
 
 # Outputs
 /frontsteps_downloads/
+*.zip
 
 # Temp files
 .DS_Store
