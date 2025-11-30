@@ -1,15 +1,17 @@
 # FRONTSTEPS document exporter
 
-Third-party software to export your documents out of https://frontsteps.com community portals.
+Export all your documents out of https://frontsteps.com community portals.
+
+Useful for backups & migration. Created by a community member (not endorsed by FRONTSTEPS).
 
 ## Usage
 
-### Prerequisites
+### Setup
 
 1. Install [Python 3](https://www.python.org/) if you don't already have it.
-1. Install packages: `pip install python-dotenv`
+1. Install required packages: `pip install python-dotenv`
 
-### Downloading your files
+### Download your files
 
 1. Clone this repository onto your computer.
 1. Rename [`.env.example`](/.env.example) to `.env` and edit the file by following the instructions inside.
