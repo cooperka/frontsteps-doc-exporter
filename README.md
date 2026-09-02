@@ -1,8 +1,8 @@
 # FRONTSTEPS document exporter
 
-Export all your documents out of https://frontsteps.com community portals.
+Export all your documents from https://frontsteps.com community portals to your local computer. Downloads PDFs and files while preserving folder structure.
 
-Useful for backups & migration. Created by a community member (not endorsed by FRONTSTEPS).
+Useful for FRONTSTEPS backups & data migration. Created by a community member (not endorsed by FRONTSTEPS).
 
 ## Usage
 
