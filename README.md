@@ -2,7 +2,9 @@
 
 Export all your documents from https://frontsteps.com community portals to your local computer. Downloads PDFs and files while preserving folder structure.
 
-Useful for FRONTSTEPS backups & data migration. Created by a community member (not endorsed by FRONTSTEPS).
+Useful for FRONTSTEPS backups & data migration. Easy to use and does not require coding.
+
+Created by a community member (not endorsed by FRONTSTEPS).
 
 ## Usage
 
